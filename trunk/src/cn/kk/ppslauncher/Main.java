@@ -29,52 +29,60 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 public class Main {
-	private final static String	PPS_CMD			= "PPStream.exe";
+    private final static String PPS_CMD = "PPStream.exe";
 
-	private final static String	APPDATA_DIR	= System.getenv("APPDATA");
+    private final static String APPDATA_DIR = System.getenv("APPDATA");
 
-	private final static String	BANNER_DIR	= APPDATA_DIR + "\\PPStream\\banner";
+    private final static String PPS_DATA_DIR = APPDATA_DIR + "\\PPStream";
 
-	private final static String	ADSYS_DIR		= APPDATA_DIR + "\\PPStream\\adsys";
+    private final static String BANNER_DIR = APPDATA_DIR + "\\PPStream\\banner";
 
-	private static final String	TITLE				= "GreenPPS（没有广告的PPS）";
+    private final static String ADSYS_DIR = APPDATA_DIR + "\\PPStream\\adsys";
 
-	private void start() {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			// silent
-		}
+    private static final String TITLE = "GreenPPS（没有广告的PPS）";
 
-		RuntimeHelper.SILENT = true;
-		RuntimeHelper.execAndWaitCommand("taskkill /f /im \"" + PPS_CMD + "\" /t");
+    private void start() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            // silent
+        }
 
-		try {
-			if (new File(ADSYS_DIR).exists()) {
-				RuntimeHelper.execAndWaitCommand("cmd /c rmdir /s /q \"" + BANNER_DIR + "\"");
-				new RuntimeHelper.StreamRedirector(System.in, new FileOutputStream(BANNER_DIR)).start();
-				RuntimeHelper.execAndWaitCommand("cmd /c rmdir /s /q \"" + ADSYS_DIR + "\"");
-				new RuntimeHelper.StreamRedirector(System.in, new FileOutputStream(ADSYS_DIR)).start();
-				File cmd = RuntimeHelper.findExecutable(PPS_CMD, "PPStream");
-				if (cmd != null) {
-					RuntimeHelper.execAndWaitCommand(cmd.getAbsolutePath());
-					System.exit(0);
-				} else {
-					JOptionPane.showMessageDialog(null, "没有找到PPS主程序！请上PPS官方网站下载并重新安装PPS！", TITLE, JOptionPane.ERROR_MESSAGE);
-					System.exit(-5);
-				}
-			} else {
-				JOptionPane.showMessageDialog(null, "PPS没有安装！请先上PPS官方网站下载并安装PPS！", TITLE, JOptionPane.ERROR_MESSAGE);
-				System.exit(-9);
-			}
-		} catch (IOException e) {
-			System.err.println("用户没有足够的权限（请使用高级用户运行本软件！）：" + e.toString());
-			System.exit(-1);
-		}
-	}
+        RuntimeHelper.SILENT = true;
+        RuntimeHelper.execAndWaitCommand("taskkill /f /im \"" + PPS_CMD + "\" /t");
 
-	public static void main(String[] args) {
-		Main main = new Main();
-		main.start();
-	}
+        try {
+            // System.out.println(PPS_DATA_DIR);
+            if (new File(PPS_DATA_DIR).exists()) {
+                RuntimeHelper.execAndWaitCommand("cmd /c rmdir /s /q \"" + BANNER_DIR + "\"");
+                new RuntimeHelper.StreamRedirector(System.in, new FileOutputStream(BANNER_DIR)).start();
+                RuntimeHelper.execAndWaitCommand("cmd /c rmdir /s /q \"" + ADSYS_DIR + "\"");
+                new RuntimeHelper.StreamRedirector(System.in, new FileOutputStream(ADSYS_DIR)).start();
+
+                File cmd = RuntimeHelper.findExecutable(PPS_CMD, "PPStream");
+                if (cmd == null) {
+                    cmd = RuntimeHelper.findExecutable(PPS_CMD, "PPS.tv");
+                }
+                if (cmd != null) {
+                    RuntimeHelper.execAndWaitCommand(cmd.getAbsolutePath());
+                    System.exit(0);
+                } else {
+                    JOptionPane.showMessageDialog(null, "没有找到PPS主程序！请上PPS官方网站下载并重新安装PPS！", TITLE,
+                            JOptionPane.ERROR_MESSAGE);
+                    System.exit(-5);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "PPS没有安装！请先上PPS官方网站下载并安装PPS！", TITLE, JOptionPane.ERROR_MESSAGE);
+                System.exit(-9);
+            }
+        } catch (Exception e) {
+            System.err.println("用户没有足够的权限（请使用高级用户运行本软件！）：" + e.toString());
+            System.exit(-1);
+        }
+    }
+
+    public static void main(String[] args) {
+        Main main = new Main();
+        main.start();
+    }
 }
