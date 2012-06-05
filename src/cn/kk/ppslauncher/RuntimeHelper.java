@@ -115,6 +115,7 @@ public final class RuntimeHelper {
     }
 
     private static final File getExecutable(final String executable, final String path) {
+    	System.out.println(path + File.separator+executable);
         if (path == null) {
             return null;
         }
